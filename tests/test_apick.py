@@ -341,7 +341,7 @@ class TestFetchSpec:
         mock_resp.text = json.dumps(spec_data)
         mock_resp.raise_for_status = MagicMock()
 
-        with patch("apick.requests.get", return_value=mock_resp) as mock_get:
+        with patch("apick.httpx.get", return_value=mock_resp) as mock_get:
             result = apick.fetch_spec("https://example.com/spec.json")
             mock_get.assert_called_once_with("https://example.com/spec.json", timeout=30)
             assert result == spec_data
@@ -477,10 +477,10 @@ class TestExecuteRequest:
     def test_returns_status_code(self):
         mock_resp = MagicMock()
         mock_resp.status_code = 200
-        mock_resp.reason = "OK"
+        mock_resp.reason_phrase = "OK"
         mock_resp.headers = {"content-type": "text/plain"}
         mock_resp.text = "ok"
 
-        with patch("apick.requests.request", return_value=mock_resp):
+        with patch("apick.httpx.request", return_value=mock_resp):
             result = apick.execute_request("GET", "https://example.com", {})
         assert result == 200

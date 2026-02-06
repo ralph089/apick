@@ -4,6 +4,8 @@ fzf-powered OpenAPI API client.
 
 Browse, search, and call any OpenAPI endpoint from the terminal.
 
+Lightweight by design — a single Python file that leans on [fzf](https://github.com/junegunn/fzf) for the interactive UI, with only [httpx](https://www.python-httpx.org/) and [PyYAML](https://pyyaml.org/) as Python dependencies.
+
 ![demo](demo.gif)
 
 ## Install

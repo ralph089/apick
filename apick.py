@@ -11,7 +11,7 @@ import tempfile
 from datetime import UTC, datetime
 from urllib.parse import urlencode, urlparse
 
-import requests
+import httpx
 import yaml
 
 HISTORY_FILE = os.path.join(os.path.expanduser("~"), ".apick", "history.json")
@@ -37,7 +37,7 @@ def highlight_json(text: str) -> str:
 def fetch_spec(source: str) -> dict:
     """Fetch and parse an OpenAPI spec from a URL or local file."""
     if urlparse(source).scheme in ("http", "https"):
-        resp = requests.get(source, timeout=30)
+        resp = httpx.get(source, timeout=30)
         resp.raise_for_status()
         content = resp.text
     else:
@@ -444,11 +444,11 @@ def execute_request(
     if body is not None:
         kwargs["json"] = body
 
-    resp = requests.request(method, url, **kwargs)  # noqa: S113 (timeout is in kwargs)
+    resp = httpx.request(method, url, **kwargs)
 
     # Status line
     color = "\033[32m" if resp.status_code < 400 else "\033[31m"
-    print(f"\n{color}{resp.status_code} {resp.reason}\033[0m")
+    print(f"\n{color}{resp.status_code} {resp.reason_phrase}\033[0m")
 
     # Response body
     ct = resp.headers.get("content-type", "")
@@ -631,7 +631,7 @@ def main():
             return
         try:
             execute_request(method, url, headers, body)
-        except requests.RequestException as e:
+        except httpx.HTTPError as e:
             print(f"\n\033[31mRequest failed: {e}\033[0m", file=sys.stderr)
             sys.exit(1)
         return
@@ -697,7 +697,7 @@ def main():
     try:
         status_code = execute_request(ep["method"], url, headers, body)
         _save_to_history(ep["method"], url, headers, body, args.spec, ep["summary"], status_code)
-    except requests.RequestException as e:
+    except httpx.HTTPError as e:
         _save_to_history(ep["method"], url, headers, body, args.spec, ep["summary"], None)
         print(f"\n\033[31mRequest failed: {e}\033[0m", file=sys.stderr)
         sys.exit(1)
