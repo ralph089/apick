@@ -17,6 +17,26 @@ import yaml
 HISTORY_FILE = os.path.join(os.path.expanduser("~"), ".apick", "history.json")
 MAX_HISTORY = 500
 
+FZF_COLOR = (
+    "dark"
+    ",fg:#c0c0c0"
+    ",fg+:#ffffff"
+    ",bg:-1"
+    ",bg+:#2d2d2d"
+    ",hl:#5f87af"
+    ",hl+:#5fd7ff"
+    ",info:#555555"
+    ",border:#444444"
+    ",label:#8a8a8a"
+    ",preview-label:#8a8a8a"
+    ",prompt:#5fd7ff"
+    ",pointer:#5fd7ff"
+    ",header:#707070"
+    ",separator:#333333"
+    ",scrollbar:#444444"
+    ",preview-border:#333333"
+)
+
 
 def highlight_json(text: str) -> str:
     """Colorize JSON text via jq. Falls back to plain text if jq is unavailable."""
@@ -142,7 +162,10 @@ def format_for_fzf(endpoints: list[dict]) -> str:
 
 def endpoint_detail(spec: dict, ep: dict) -> str:
     """Format detail string for fzf preview pane."""
-    lines = []
+    dim = "\033[2m"
+    reset = "\033[0m"
+    sep = f"{dim}{'─' * 40}{reset}"
+    lines = [""]
     lines.append(f"\033[1m{ep['method']} {ep['path']}\033[0m")
     if ep["summary"]:
         lines.append(f"  {ep['summary']}")
@@ -153,6 +176,7 @@ def endpoint_detail(spec: dict, ep: dict) -> str:
     # Parameters
     params = ep.get("parameters", [])
     if params:
+        lines.append(sep)
         lines.append("\033[1mParameters:\033[0m")
         for p in params:
             required = " (required)" if p.get("required") else ""
@@ -167,6 +191,7 @@ def endpoint_detail(spec: dict, ep: dict) -> str:
     # Request body
     rb = ep.get("requestBody")
     if rb:
+        lines.append(sep)
         lines.append("\033[1mRequest Body:\033[0m")
         content = rb.get("content", {})
         for media, media_obj in content.items():
@@ -179,6 +204,7 @@ def endpoint_detail(spec: dict, ep: dict) -> str:
 
     # Responses
     if ep.get("responses"):
+        lines.append(sep)
         lines.append("\033[1mResponses:\033[0m")
         for code, resp in ep["responses"].items():
             desc = resp.get("description", "") if isinstance(resp, dict) else ""
@@ -234,6 +260,46 @@ def format_schema_tree(schema: dict, indent: int = 0) -> str:
     return "\n".join(lines)
 
 
+def _fzf_base_args(border_label: str, ghost: str, header: str) -> list[str]:
+    return [
+        "fzf",
+        "--ansi",
+        "--reverse",
+        "--delimiter",
+        "\t",
+        "--with-nth",
+        "2..",
+        "--style",
+        "full",
+        "--color",
+        FZF_COLOR,
+        "--border",
+        "rounded",
+        "--border-label",
+        border_label,
+        "--border-label-pos",
+        "2",
+        "--highlight-line",
+        "--pointer",
+        "▶",
+        "--scrollbar",
+        "│",
+        "--ellipsis",
+        "..",
+        "--prompt",
+        "  ",
+        "--ghost",
+        ghost,
+        "--info",
+        "inline-right",
+        "--separator",
+        "",
+        "--header",
+        header,
+        "--header-first",
+    ]
+
+
 def pick_endpoint(endpoints: list[dict], spec: dict, script_path: str) -> dict | None:
     """Shell out to fzf and return the selected endpoint."""
     fzf_input = format_for_fzf(endpoints)
@@ -252,29 +318,24 @@ def pick_endpoint(endpoints: list[dict], spec: dict, script_path: str) -> dict |
         preview_cmd = (
             f"{sys.executable} {script_path} --_preview {{1}} --_spec-file {spec_file_name}"
         )
+        fzf_args = [
+            *_fzf_base_args(
+                border_label=border_label,
+                ghost="type to filter endpoints...",
+                header=" ↑↓ navigate  enter select  esc quit",
+            ),
+            "--preview",
+            preview_cmd,
+            "--preview-window",
+            "right:50%:wrap:border-left",
+            "--preview-label",
+            " details ",
+            "--preview-label-pos",
+            "2",
+        ]
         try:
             result = subprocess.run(
-                [
-                    "fzf",
-                    "--ansi",
-                    "--reverse",
-                    "--delimiter",
-                    "\t",
-                    "--with-nth",
-                    "2..",
-                    "--border",
-                    "rounded",
-                    "--border-label",
-                    border_label,
-                    "--pointer",
-                    "▶",
-                    "--header",
-                    "Select an endpoint (type to search)",
-                    "--preview",
-                    preview_cmd,
-                    "--preview-window",
-                    "right:50%:wrap",
-                ],
+                fzf_args,
                 input=fzf_input,
                 capture_output=True,
                 text=True,
@@ -528,28 +589,23 @@ def pick_history_entry(entries: list[dict]) -> dict | None:
     """Open fzf over history entries and return the selected one."""
     fzf_input = format_history_for_fzf(entries)
     try:
+        fzf_args = [
+            *_fzf_base_args(
+                border_label=" apick history ",
+                ghost="type to filter history...",
+                header=" ↑↓ navigate  enter replay  esc quit",
+            ),
+            "--preview",
+            "echo {2..}",
+            "--preview-window",
+            "down:3:wrap:border-top",
+            "--preview-label",
+            " request ",
+            "--preview-label-pos",
+            "2",
+        ]
         result = subprocess.run(
-            [
-                "fzf",
-                "--ansi",
-                "--reverse",
-                "--delimiter",
-                "\t",
-                "--with-nth",
-                "2..",
-                "--border",
-                "rounded",
-                "--border-label",
-                " history ",
-                "--pointer",
-                "▶",
-                "--header",
-                "Select a request to replay (type to search)",
-                "--preview",
-                "echo {2..}",
-                "--preview-window",
-                "down:3:wrap",
-            ],
+            fzf_args,
             input=fzf_input,
             capture_output=True,
             text=True,
