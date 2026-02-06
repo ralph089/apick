@@ -150,8 +150,8 @@ class TestFormatForFzf:
         output = apick.format_for_fzf(eps)
         lines = output.split("\n")
         assert len(lines) == 2
-        assert lines[0].startswith("0000 ")
-        assert lines[1].startswith("0001 ")
+        assert lines[0].startswith("0000\t")
+        assert lines[1].startswith("0001\t")
 
     def test_color_codes(self):
         eps = [
@@ -448,8 +448,13 @@ class TestHistory:
 
     def test_format_history_null_status_shows_err(self):
         entries = [
-            {"method": "GET", "url": "https://a.com", "timestamp": "",
-             "status_code": None, "summary": ""},
+            {
+                "method": "GET",
+                "url": "https://a.com",
+                "timestamp": "",
+                "status_code": None,
+                "summary": "",
+            },
         ]
         output = apick.format_history_for_fzf(entries)
         assert "err" in output

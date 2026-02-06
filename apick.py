@@ -136,7 +136,7 @@ def format_for_fzf(endpoints: list[dict]) -> str:
         }
         color = colors.get(ep["method"], "\033[0m")
         reset = "\033[0m"
-        lines.append(f"{i:04d} {color}{method}{reset} {path} {summary}")
+        lines.append(f"{i:04d}\t{color}{method}{reset} {path} {summary}")
     return "\n".join(lines)
 
 
@@ -245,6 +245,9 @@ def pick_endpoint(endpoints: list[dict], spec: dict, script_path: str) -> dict |
         json.dump(spec, spec_file)
         spec_file_name = spec_file.name
 
+    api_title = spec.get("info", {}).get("title")
+    border_label = f" apick — {api_title} " if api_title else " apick "
+
     try:
         preview_cmd = (
             f"{sys.executable} {script_path} --_preview {{1}} --_spec-file {spec_file_name}"
@@ -255,11 +258,16 @@ def pick_endpoint(endpoints: list[dict], spec: dict, script_path: str) -> dict |
                     "fzf",
                     "--ansi",
                     "--reverse",
-                    "--nth", "2..",
-                    "--with-nth", "2..",
-                    "--border", "rounded",
-                    "--border-label", " apick ",
-                    "--pointer", "▶",
+                    "--delimiter",
+                    "\t",
+                    "--with-nth",
+                    "2..",
+                    "--border",
+                    "rounded",
+                    "--border-label",
+                    border_label,
+                    "--pointer",
+                    "▶",
                     "--header",
                     "Select an endpoint (type to search)",
                     "--preview",
@@ -511,7 +519,7 @@ def format_history_for_fzf(entries: list[dict]) -> str:
         url = entry.get("url", "")
         summary = entry.get("summary", "")
         lines.append(
-            f"{real_idx:04d} {ts}  {color}{method:7s}{reset} [{status_str:>3s}] {url}  {summary}"
+            f"{real_idx:04d}\t{ts}  {color}{method:7s}{reset} [{status_str:>3s}] {url}  {summary}"
         )
     return "\n".join(lines)
 
@@ -525,11 +533,16 @@ def pick_history_entry(entries: list[dict]) -> dict | None:
                 "fzf",
                 "--ansi",
                 "--reverse",
-                "--nth", "2..",
-                "--with-nth", "2..",
-                "--border", "rounded",
-                "--border-label", " history ",
-                "--pointer", "▶",
+                "--delimiter",
+                "\t",
+                "--with-nth",
+                "2..",
+                "--border",
+                "rounded",
+                "--border-label",
+                " history ",
+                "--pointer",
+                "▶",
                 "--header",
                 "Select a request to replay (type to search)",
                 "--preview",

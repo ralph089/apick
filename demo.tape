@@ -8,7 +8,7 @@ Set FontSize 16
 Set Width 1200
 Set Height 700
 Set Padding 20
-Set TypingSpeed 50ms
+Set TypingSpeed 30ms
 Set Theme "Catppuccin Mocha"
 Set WindowBar Colorful
 Set WindowBarSize 40
@@ -16,35 +16,25 @@ Set WindowBarSize 40
 Sleep 500ms
 
 # Launch apick with the Petstore OpenAPI spec
-Type "apick https://petstore3.swagger.io/api/v3/openapi.json"
+Type "uv run apick https://petstore3.swagger.io/api/v3/openapi.json"
 Sleep 300ms
 Enter
 
-# Wait for spec download + fzf to appear
-Sleep 6s
-
-# Browse endpoints (scroll down to show the list)
-Down
-Sleep 300ms
-Down
-Sleep 300ms
-Down
-Sleep 300ms
-Down
-Sleep 500ms
+# Wait for uv startup + spec download + fzf to appear
+Sleep 8s
 
 # Search for GET /pet/{petId}
 Type "GET petId"
-Sleep 2s
+Sleep 1s
 
 # Select the endpoint
 Enter
-Sleep 1.5s
+Sleep 2s
 
 # Enter the petId path parameter
 Type "7"
-Sleep 300ms
+Sleep 200ms
 Enter
 
 # Wait for the API response
-Sleep 5s
+Sleep 3s
