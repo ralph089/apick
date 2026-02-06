@@ -4,6 +4,8 @@ fzf-powered OpenAPI API client.
 
 Browse, search, and call any OpenAPI endpoint from the terminal.
 
+![demo](demo.gif)
+
 ## Install
 
 ```
