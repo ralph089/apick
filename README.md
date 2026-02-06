@@ -32,7 +32,7 @@ apick --history [--token TOKEN] [--dry-run]
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.11+
 - [fzf](https://github.com/junegunn/fzf)
 - Optional: [jq](https://jqlang.github.io/jq/) for syntax-highlighted JSON output
 
