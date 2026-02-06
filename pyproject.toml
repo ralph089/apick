@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apick"
+dynamic = ["version"]
+description = "fzf-powered OpenAPI API client"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "requests",
+    "pyyaml",
+]
+keywords = ["openapi", "api", "fzf", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
+
+[project.scripts]
+apick = "apick:main"
+
+[project.urls]
+Homepage = "https://github.com/ralph089/apick"
+Repository = "https://github.com/ralph089/apick"
+
+[tool.hatch.version]
+path = "apick.py"
+
+[tool.hatch.build]
+include = ["apick.py"]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "W",     # pycodestyle warnings
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "SIM",   # flake8-simplify
+    "RUF",   # ruff-specific rules
+    "S",     # flake8-bandit (security)
+    "A",     # flake8-builtins (shadowing builtins)
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez (naive datetime)
+    "T10",   # flake8-debugger (leftover breakpoints)
+    "T20",   # flake8-print (print statements)
+    "PT",    # flake8-pytest-style
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "PIE",   # flake8-pie (misc lints)
+    "PERF",  # perflint (performance anti-patterns)
+    "FURB",  # refurb (modernization)
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "FLY",   # flynt (f-string conversion)
+    "TCH",   # flake8-type-checking (move imports behind TYPE_CHECKING)
+]
+ignore = [
+    "T201",  # allow print() — CLI tool
+    "S603",  # allow subprocess calls without shell=True check — needed for fzf/jq
+    "S607",  # allow partial executable paths — fzf/jq/editor are expected on PATH
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",  # allow assert in tests
+    "S108",  # allow /tmp paths in tests
+]
+
+[tool.semantic_release]
+version_variables = ["apick.py:__version__"]
+
+[tool.ty.environment]
+python-version = "3.11"
