@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v0.0.2 (2026-02-08)
+
+### Bug Fixes
+
+- Detect JSON responses by parsing body instead of content-type
+  ([`11a1761`](https://github.com/ralph089/apick/commit/11a17613e35f4defe14ef342b2fd52542fb2ece2))
+
+### Build System
+
+- **deps**: Bump python-semantic-release/publish-action from 9 to 10
+  ([`42c706a`](https://github.com/ralph089/apick/commit/42c706a8aca520899d68695d324c985e54d9d670))
+
+Bumps
+  [python-semantic-release/publish-action](https://github.com/python-semantic-release/publish-action)
+  from 9 to 10. - [Release
+  notes](https://github.com/python-semantic-release/publish-action/releases) -
+  [Changelog](https://github.com/python-semantic-release/publish-action/blob/main/releaserc.toml) -
+  [Commits](https://github.com/python-semantic-release/publish-action/compare/v9...v10)
+
+--- updated-dependencies: - dependency-name: python-semantic-release/publish-action
+  dependency-version: '10'
+
+dependency-type: direct:production
+
+update-type: version-update:semver-major ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+
 ## v0.0.1 (2026-02-06)
 
 ### Bug Fixes
