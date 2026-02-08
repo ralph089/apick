@@ -525,14 +525,10 @@ def execute_request(
     print(f"\n{color}{resp.status_code} {resp.reason_phrase}\033[0m")
 
     # Response body
-    ct = resp.headers.get("content-type", "")
-    if "json" in ct:
-        try:
-            formatted = json.dumps(resp.json(), indent=2)
-            print(highlight_json(formatted))
-        except Exception:
-            print(resp.text)
-    else:
+    try:
+        formatted = json.dumps(resp.json(), indent=2)
+        print(highlight_json(formatted))
+    except Exception:
         print(resp.text)
 
     return resp.status_code

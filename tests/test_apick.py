@@ -483,9 +483,34 @@ class TestExecuteRequest:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.reason_phrase = "OK"
-        mock_resp.headers = {"content-type": "text/plain"}
+        mock_resp.json.side_effect = ValueError("not json")
         mock_resp.text = "ok"
 
         with patch("apick.httpx.request", return_value=mock_resp):
             result = apick.execute_request("GET", "https://example.com", {})
         assert result == 200
+
+    def test_json_response_highlighted(self):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.reason_phrase = "OK"
+        mock_resp.json.return_value = {"key": "value"}
+
+        with (
+            patch("apick.httpx.request", return_value=mock_resp),
+            patch("apick.highlight_json", return_value='{\n  "key": "value"\n}') as mock_hl,
+        ):
+            result = apick.execute_request("GET", "https://example.com", {})
+        assert result == 200
+        mock_hl.assert_called_once()
+
+    def test_invalid_json_falls_back_to_text(self, capsys):
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.reason_phrase = "OK"
+        mock_resp.json.side_effect = ValueError("not json")
+        mock_resp.text = "plain text body"
+
+        with patch("apick.httpx.request", return_value=mock_resp):
+            apick.execute_request("GET", "https://example.com", {})
+        assert "plain text body" in capsys.readouterr().out
